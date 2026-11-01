@@ -1,37 +1,101 @@
 # XAOS
 
-Xpleon Agentic Operating System.
+**Xpleon Agent Orchestration System**
 
-XAOS is a high-performance, deterministic multi-agent runtime kernel written in Rust. It is designed for mission-critical AI systems where autonomous agents must be constrained by strict, auditable safety boundaries.
+In-process multi-agent runtime kernel for governed autonomous work.  
+Agents propose tasks. Capability policy and the governance gate admit or deny. Admitted work runs under sandbox constraints. Decisions and outcomes append to a causal record.
 
-## System Architecture
+XAOS is the **runtime**. It is not a foundation model and not an open execution fabric.
 
-Traditional agentic frameworks conflate the generation of intent with the execution of tools, creating an unbounded attack surface. XAOS solves this by strictly partitioning the runtime into four isolated planes:
+---
 
-1. Proposer Plane: Employs neuro-symbolic feature ranking to suggest `TaskSpec` candidates based on historical state transitions.
-2. Policy Plane: Validates agent capabilities against the configured domain profile and checks queue health.
-3. Governance Plane: Evaluates the proposed task against an immutable, state-aware policy engine to generate a deterministic `GovernanceAction`.
-4. Execution Plane: If and only if the governance gate commits the task, it is dispatched to a sandboxed execution backend.
+## Overview
 
-## Core Modules
+XAOS runs a deterministic control loop over a fixed set of agent roles:
 
-XAOS is designed around strict trait boundaries, allowing engineers to plug in their own implementations for storage, execution, and rule evaluation.
+| Concern | Responsibility |
+|---------|----------------|
+| **Orchestration** | Tick loop, task queue, assignment, retries, dead-letter |
+| **Proposal** | Ranked candidates (including ATE-assisted scoring where enabled) |
+| **Governance** | Capability checks + gate evaluation before side effects |
+| **Lifecycle** | Quarantine, heal eligibility, regeneration hooks |
+| **Evidence** | Structured events and optional chain-linked vault records |
+| **Learning** | Proposer-side adaptation from outcomes — not gate mutation |
 
-| Module | Responsibility | Interface Definition |
-| :--- | :--- | :--- |
-| `governance` | Causal action mapping and state evaluation. | `GovernanceGate` |
-| `orchestrator` | Tick loop, state reconciliation, and task dispatch. | `AgenticOrchestrator` |
-| `ate_features` | Proposer-side adaptive feature ranking. | `AteTile` |
-| `lifecycle` | Durable quarantine, fault isolation, and heal protocols. | `QuarantineRegistry` |
-| `storage` | Cryptographic append-only Write-Ahead Log (WAL). | `CausalStore` |
+External models may propose. XAOS decides whether anything runs.
 
-## Integration with XAGS
+---
 
-XAOS defines the core kernel traits. For enterprise-grade deployment, the Xpleon Agentic Governance System (XAGS) provides a fully implemented, cloud-native gateway that builds upon these interfaces.
+## Architecture
 
-XAGS provides:
-- Deterministic 1,176-rule policy enforcement.
-- Multi-tenant cryptographic audit trails.
-- Native REST and Model Context Protocol (MCP) gateway support.
+```text
+                 ┌──────────────────────────┐
+                 │     Agent registry       │
+                 │  roles · queues · health │
+                 └────────────┬─────────────┘
+                              │
+                              ▼
+                 ┌──────────────────────────┐
+                 │      Orchestrator        │
+                 │   tick · schedule · DLQ  │
+                 └────────────┬─────────────┘
+                              │
+              propose ────────┤
+                              ▼
+                 ┌──────────────────────────┐
+                 │  Capability + domain     │
+                 │  policy (allow / deny)   │
+                 └────────────┬─────────────┘
+                              │
+                              ▼
+                 ┌──────────────────────────┐
+                 │     Governance gate      │
+                 │  rules · score · deny    │
+                 └────────────┬─────────────┘
+                     admit │ deny
+              ┌────────────┴────────────┐
+              ▼                         ▼
+     ┌─────────────────┐       ┌─────────────────┐
+     │    Execution    │       │   Dead-letter   │
+     │ sandbox / tools │       │   + reason code │
+     └────────┬────────┘       └────────┬────────┘
+              │                         │
+              └────────────┬────────────┘
+                           ▼
+                 ┌──────────────────────────┐
+                 │  Causal event log / WAL  │
+                 │  (optional ElderVault)   │
+                 └──────────────────────────┘
 
-Live XAGS Demo: https://huggingface.co/spaces/Nambi23/Xpleon-Labs
+
+Invariants
+No tool path bypasses the gate.
+Unknown or unmatched external actions fail closed.
+Outcome data may update proposer weights; it does not rewrite the rulebook.
+Replay and audit rest on ordered, content-linked records — not chat logs alone.
+
+**Module**                                                **Function**
+Orchestrator                           Synchronous tick cycle: dequeue, assign, govern, execute or dead-letter"
+Agent registry                         Named roles, queue depth, status, notes, quarantine flags"
+ATE-assisted proposer                  Feature-scored candidates for ranking (proposal plane only)
+Capability policy                      equired permissions and domain constraints per task kind
+Governance gate                        Explicit admit / deny / halt with recorded rule identity
+Lifecycle                              Quarantine, heal, and regeneration eligibility after failures"
+Workflow synthesizer                   Draft multi-step workflows subject to approval / gate
+Execution path                         Allowlisted shell, jailed paths, constrained HTTP where enabled"
+Learning store                         Append-only experience (JSONL or equivalent) for proposer adaptation
+Evidence plane                         Event emission; optional fixed-width causal vault records
+
+**Security model** 
+**Separation of planes : proposal ≠ admission ≠ actuation.
+Fail closed : missing capability, unknown action, or gate miss → deny / dead-letter.
+Sandbox defaults : no open shell, no open HTTP; allowlists only.
+Evidence : decisions and outcomes are ordered records suitable for review.
+Learning bound : adaptation does not enlarge authority or edit the rulebook.
+
+License Proprietary- Xpleon Labs.
+
+Contact: 
+Xpleon Labs
+https://xpleonlabs.com
+contact@xpleonlabs.comtext-
