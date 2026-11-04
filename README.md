@@ -5,7 +5,7 @@
 In-process multi-agent runtime kernel for governed autonomous work.  
 Agents propose tasks. Capability policy and the governance gate admit or deny. Admitted work runs under sandbox constraints. Decisions and outcomes append to a causal record.
 
-XAOS is the **runtime**. It is not a foundation model and not an open execution fabric.
+XAOS is the **runtime** agentic Orchestration and management system
 
 ---
 
