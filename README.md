@@ -1,4 +1,4 @@
-# XAOS*Xpleon Agent Orchestration System#
+# XAOS Xpleon Agent Orchestration System#
 
 XAOS is an in-process multi-agent runtime kernel for governed autonomous work. 
 
@@ -7,22 +7,21 @@ Agents propose tasks. Capability policies and the Governance Gate evaluate them.
 # XAOS is the runtime orchestration and management system for enterprise AI deployments.
 
 
-## Overview
+# Overview
 
 XAOS runs a deterministic control loop over a fixed set of agent roles, ensuring that no autonomous action goes unverified. 
 
 | Concern | Responsibility |
 |---------|----------------|
-| **Orchestration** | Task queuing, assignment, lifecycle management, and retries |
-| **Proposal** | Generation of ranked action candidates |
-| **Governance** | Hard capability checks and policy evaluation before side effects |
-| **Lifecycle** | Automated quarantine, healing eligibility, and agent regeneration |
-| **Evidence** | Structured event emission and immutable audit logging |
-| **Learning** | Proposer-side adaptation based on historical outcomes |
+|  Orchestration| Task queuing, assignment, lifecycle management, and retries |
+| Proposal | Generation of ranked action candidates |
+| Governance| Hard capability checks and policy evaluation before side effects |
+| Lifecycle | Automated quarantine, healing eligibility, and agent regeneration |
+| Evidence | Structured event emission and immutable audit logging |
+| Learning | Proposer-side adaptation based on historical outcomes |
 
 External models may propose actions, but XAOS determines what is allowed to run.
 
----
 
 ## Architecture
 
@@ -52,8 +51,8 @@ XAOS is built on strict, non-negotiable security invariants:
 
 1. # No tool path bypasses the gate.** Every action must be explicitly admitted.
 2. *Fail-closed by default.** Unknown or unmatched external actions are denied and dead-lettered.
-3. **Immutable core rules.# Outcome data may optimize proposer weights (learning), but it cannot mutate the core governance rulebook.
-4. **Cryptographic replay.** Audit and replay rely on ordered, content-linked records, not mutable chat logs.
+3. #Immutable core rules.# Outcome data may optimize proposer weights (learning), but it cannot mutate the core governance rulebook.
+4. # Cryptographic replay. Audit and replay rely on ordered, content-linked records, not mutable chat logs.
 
 ---
 
@@ -61,16 +60,16 @@ XAOS is built on strict, non-negotiable security invariants:
 
 | Module | Primary Function |
 | :--- | :--- |
-| **Orchestrator** | Manages the deterministic tick cycle, task scheduling, and dead-letter routing. |
-| **Agent Registry** | Tracks named roles, queue depths, health status, and quarantine flags. |
-| **Proposal Engine** | Generates candidate actions (supports advanced ATE-assisted ranking). |
-| **Capability Policy** | Enforces required permissions and domain constraints per task type. |
-| **Governance Gate** | The final adjudicator. Explicitly admits, denies, or halts actions with recorded rule identities. |
-| **Lifecycle Manager** | Handles agent quarantine, healing, and regeneration after failures. |
-| **Workflow Synthesizer** | Drafts multi-step workflows, subject to gate approval at each step. |
-| **Execution Path** | Sandboxed execution with strict allowlists (shell, HTTP, etc.). |
-| **Evidence Plane** | Emits structured events and maintains the immutable causal audit log. |
-| **Learning Store** | Tracks historical outcomes to adapt future proposals without altering hard rules. |
+| # Orchestrator | Manages the deterministic tick cycle, task scheduling, and dead-letter routing. |
+| # Agent Registry | Tracks named roles, queue depths, health status, and quarantine flags. |
+| # Proposal Engine  | Generates candidate actions (supports advanced ATE-assisted ranking). |
+| # Capability Policy  | Enforces required permissions and domain constraints per task type. |
+| # Governance Gate | The final adjudicator. Explicitly admits, denies, or halts actions with recorded rule identities. |
+| # Lifecycle Manager | Handles agent quarantine, healing, and regeneration after failures. |
+| # Workflow Synthesizer | Drafts multi-step workflows, subject to gate approval at each step. |
+| # Execution Path | Sandboxed execution with strict allowlists (shell, HTTP, etc.). |
+| # Evidence Plane | Emits structured events and maintains the immutable causal audit log. |
+| # Learning Store  | Tracks historical outcomes to adapt future proposals without altering hard rules. |
 
 ---
 
